@@ -1,51 +1,105 @@
-### book package
+# 图书管理系统开发过程与架构分析
 
-**Class Book:**
+## 系统开发流程
 
-String name
+### 1. 需求分析与设计
 
-String author
+首先确定了系统的基本需求：
 
-int price
+- 管理图书信息（书名、作者）
+- 区分不同用户角色（管理员、普通用户）
+- 提供不同操作（添加、显示、退出）
 
-String type
+### 2. 架构设计
 
-boolean isLend
+采用了分层架构设计：
 
-**Class BookList:**
+- 数据层：存储图书信息
+- 操作层：定义各种操作
+- 用户层：处理不同用户权限
+- 控制层：程序入口与流程控制
 
-Book[] books
+### 3. 开发顺序
 
-int size;
+**第一步：创建基础数据模型**
 
-### user package:
+- 先实现 `Book` 类，定义图书的基本属性
+- 然后实现 `BookList` 类，作为图书的容器和管理器
 
-**abstract class User:**
+**第二步：设计操作接口与实现**
 
-String name;
+- 定义 `IOperation` 接口，统一操作行为
+- 实现具体操作类：`AddBookOperation`、`ShowBookOperation`、`ExitOperation`
 
-IOperation[] iOpertions;
+**第三步：设计用户体系**
 
-**class AdminUser extends User:**
+- 创建抽象 `User` 类，定义通用行为
+- 实现具体用户类：`AdminUser`、`NormalUser`，各自持有不同的操作权限
 
-**class NormalUser extends User:**
+**第四步：实现程序入口**
 
-### operation package:
+- 创建 `Main` 类，处理用户登录和主循环逻辑
 
-**interface IOperation:**
+## 代码实现思路
 
-void perform
+### 1. 自底向上构建
 
-**AddBookOperation:**
+先构建基础组件（Book），再构建依赖这些组件的上层模块（BookList、操作类），最后实现控制逻辑。
 
-BorrowBookOperation:
+### 2. 接口先行
 
-DeleteBookOperation:
+先定义接口（IOperation），再实现具体类，保证系统的可扩展性。
 
-ExitBookOperation:
+### 3. 设计模式应用
 
-FindBookOperation:
+- **策略模式**：将不同操作封装为策略类
+- **模板方法模式**：抽象用户类定义操作流程
+- **工厂方法**：Main.login() 根据选择创建不同用户对象
 
-ReturnBookOperation:
+## 编程技巧与实践
 
-ShowBookOperation:
+### 1. 数组存储操作
+
+用户类中使用数组存储操作对象，通过索引直接访问：
+
+```java
+protected IOperation[] iOperations;
+public void doOperation(int choice, BookList bookList){
+    iOperations[choice].perform(bookList);
+}
+```
+
+### 2. 多态应用
+
+通过多态机制，在不知道具体用户类型的情况下调用菜单和操作：
+
+```java
+User user = login();
+int choice = user.menu();
+user.doOperation(choice, bookList);
+```
+
+### 3. 职责分离
+
+- `Book` 只负责单本图书数据
+- `BookList` 只负责图书集合管理
+- 操作类只负责具体业务逻辑
+- 用户类只负责菜单展示和操作分发
+
+## 系统扩展方向
+
+这个系统的设计使得添加新功能非常简单：
+
+1. **添加新操作**
+   - 创建新的操作类实现 IOperation 接口
+   - 在相应用户类的构造函数中添加该操作
+
+2. **添加新用户角色**
+   - 继承 User 类创建新的用户类
+   - 实现特定的菜单和操作集合
+
+3. **增强图书属性**
+   - 扩展 Book 类添加更多属性（如价格、分类等）
+   - 相应地修改操作类以支持新属性
+
+通过这种模块化、基于接口的设计，系统可以在不改变核心架构的情况下灵活扩展功能。
